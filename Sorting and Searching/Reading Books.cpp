@@ -1,3 +1,5 @@
+// proof refer to: https://www.geeksforgeeks.org/cses-solutions-reading-books/
+
 #include <algorithm>
 // #include <bits/stdc++.h>
 #include <deque>
@@ -30,28 +32,23 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll N, K, x[MAXN];
+ll N, k[MAXN];
 
 void solve(){
-    cin >> N >> K;
-    ll ans = 0;
-    queue<ll> qu;
-    map<ll, ll> mp;
-    ll diff = 0;
+    cin >> N;
+    ll sum = 0;
     for(int i = 0; i < N; i++){
-        cin >> x[i];
-        mp[x[i]]++;
-        qu.push(x[i]);
-        if(mp[x[i]] == 1) diff++;
-        while(qu.size() and diff > K){
-          ll now = qu.front();
-          qu.pop();
-          mp[now]--;
-          if(mp[now] == 0) diff--;
-        }
-        ans += qu.size();
+        cin >> k[i];
+        sum += k[i];
     }
-    cout << ans << "\n";
+    sort(k, k+N);
+    sum -= k[N-1];
+    if(k[N-1] >= sum){
+        cout << 2 * k[N-1] << "\n";
+    }
+    else{
+        cout << sum + k[N-1] << "\n";
+    }
 }
  
 signed main() {

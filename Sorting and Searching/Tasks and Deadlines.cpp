@@ -1,5 +1,7 @@
+// proof refer to: https://www.geeksforgeeks.org/cses-solutions-tasks-and-deadlines/
+
 #include <algorithm>
-// #include <bits/stdc++.h>
+// #include <bits/stdc++.h> 
 #include <deque>
 #include <cmath>
 #include <iostream>
@@ -30,28 +32,20 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll N, K, x[MAXN];
+ll N;
+pll t[MAXN];
 
 void solve(){
-    cin >> N >> K;
-    ll ans = 0;
-    queue<ll> qu;
-    map<ll, ll> mp;
-    ll diff = 0;
-    for(int i = 0; i < N; i++){
-        cin >> x[i];
-        mp[x[i]]++;
-        qu.push(x[i]);
-        if(mp[x[i]] == 1) diff++;
-        while(qu.size() and diff > K){
-          ll now = qu.front();
-          qu.pop();
-          mp[now]--;
-          if(mp[now] == 0) diff--;
-        }
-        ans += qu.size();
+    cin >> N;
+    ll reward = 0;
+    ll day = 0;
+    for(ll i = 0; i < N; i++) cin >> t[i].F >> t[i].S;
+    sort(t, t+N);
+    for(ll i = 0; i < N; i++){
+        day += t[i].F;
+        reward += t[i].S - day;
     }
-    cout << ans << "\n";
+    cout << reward << "\n";
 }
  
 signed main() {

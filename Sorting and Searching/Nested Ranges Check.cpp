@@ -1,3 +1,6 @@
+// refer to: https://www.geeksforgeeks.org/cses-solutions-nested-ranges-check/
+// we can see graph [ {} ] think this correctness
+
 #include <algorithm>
 // #include <bits/stdc++.h>
 #include <deque>
@@ -30,28 +33,34 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll N, K, x[MAXN];
+ll N, contain[MAXN], contained[MAXN];
 
 void solve(){
-    cin >> N >> K;
-    ll ans = 0;
-    queue<ll> qu;
-    map<ll, ll> mp;
-    ll diff = 0;
-    for(int i = 0; i < N; i++){
-        cin >> x[i];
-        mp[x[i]]++;
-        qu.push(x[i]);
-        if(mp[x[i]] == 1) diff++;
-        while(qu.size() and diff > K){
-          ll now = qu.front();
-          qu.pop();
-          mp[now]--;
-          if(mp[now] == 0) diff--;
-        }
-        ans += qu.size();
+    cin >> N;
+    vector<pair<pll, ll> > vec(N);
+    for(ll i = 0; i < N; i++){
+        cin >> vec[i].F.F >> vec[i].F.S;
+        vec[i].F.S *= -1;
+        vec[i].S = i;
     }
-    cout << ans << "\n";
+    sort(all(vec));
+    ll minEnd = -INF;
+    for(ll i = N-1; i >= 0; i--){
+        if(minEnd >= vec[i].F.S){
+            contain[vec[i].S] = 1;
+        }
+        minEnd = max(minEnd, vec[i].F.S);
+    }
+    for(ll i = 0; i < N; i++) cout << contain[i] << " ";
+    cout << "\n";
+    ll maxEnd = 1;
+    for(ll i = 0; i < N; i++){
+        if(maxEnd <= vec[i].F.S){
+            contained[vec[i].S] = 1;
+        }
+        maxEnd = min(maxEnd, vec[i].F.S);
+    }
+    for(ll i = 0; i < N; i++) cout << contained[i] << " ";
 }
  
 signed main() {

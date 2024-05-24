@@ -1,3 +1,6 @@
+// refer to: https://www.geeksforgeeks.org/cses-solutions-nested-ranges-check/
+// we can see graph [ {} ] think this correctness
+
 #include <algorithm>
 // #include <bits/stdc++.h>
 #include <deque>
@@ -32,26 +35,33 @@ const ll MOD = 1e9 + 7;
  
 ll N, K, x[MAXN];
 
+bool isVaild(ll val){
+    ll cnt = 1, sum = 0;
+    ll lptr = 0;
+    while(lptr < N){
+        if(x[lptr] > val) return false;
+        if(sum + x[lptr] <= val){
+            sum += x[lptr];
+            lptr++;
+        }
+        else{
+            sum = x[lptr];
+            lptr++;
+            cnt++;
+        }
+    }
+    return cnt <= K;
+}
+
 void solve(){
     cin >> N >> K;
-    ll ans = 0;
-    queue<ll> qu;
-    map<ll, ll> mp;
-    ll diff = 0;
-    for(int i = 0; i < N; i++){
-        cin >> x[i];
-        mp[x[i]]++;
-        qu.push(x[i]);
-        if(mp[x[i]] == 1) diff++;
-        while(qu.size() and diff > K){
-          ll now = qu.front();
-          qu.pop();
-          mp[now]--;
-          if(mp[now] == 0) diff--;
-        }
-        ans += qu.size();
+    for(int i = 0; i < N; i++) cin >> x[i];
+    ll step = pow(2, 40), ans = 0;
+    while(step){
+        if(isVaild(step + ans)) step /= 2;
+        else ans += step;
     }
-    cout << ans << "\n";
+    cout << ans + 1 << "\n";
 }
  
 signed main() {

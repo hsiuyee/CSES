@@ -1,3 +1,7 @@
+// a[0, j] = P, a[0, i] = P with i < j 
+// infer a[i+1, j] = 0 
+// every op under mod N
+
 #include <algorithm>
 // #include <bits/stdc++.h>
 #include <deque>
@@ -30,28 +34,27 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll N, K, x[MAXN];
+ll N;
 
 void solve(){
-    cin >> N >> K;
-    ll ans = 0;
+    cin >> N;
     queue<ll> qu;
-    map<ll, ll> mp;
-    ll diff = 0;
-    for(int i = 0; i < N; i++){
-        cin >> x[i];
-        mp[x[i]]++;
-        qu.push(x[i]);
-        if(mp[x[i]] == 1) diff++;
-        while(qu.size() and diff > K){
-          ll now = qu.front();
-          qu.pop();
-          mp[now]--;
-          if(mp[now] == 0) diff--;
-        }
-        ans += qu.size();
+    for(ll i = 1; i <= N; i++){
+        qu.push(i);
     }
-    cout << ans << "\n";
+    int flag = 0;
+    while(qu.size() > 1){
+        ll now = qu.front();
+        qu.pop();
+        if(flag){
+            cout << now << " ";
+        }
+        else{
+            qu.push(now);
+        }
+        flag ^= 1;
+    }
+    cout << qu.front() << "\n";
 }
  
 signed main() {
