@@ -33,8 +33,22 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll N, contain[MAXN], contained[MAXN];
+ll N, contain[MAXN], contained[MAXN], bit[MAXN];
+
+void upd(ll x, ll d){
+    for(int i = x; i < MAXN; i += lowbit(i)){
+        bit[x] += d;
+    }
+}
  
+ll qry(ll x){
+    ll rev = 0;
+    for(int i = x; i > 0; i -=lowbit(i)){
+        rev += bit[i];
+    }
+    return rev;
+}
+
 void solve(){
     cin >> N;
     vector<pair<pll, ll> > vec(N);
