@@ -1,4 +1,3 @@
-// refer to: https://yuihuang.com/cses-1669/
 #include <algorithm>
 // #include <bits/stdc++.h>
 #include <deque>
@@ -35,33 +34,67 @@ ll N, M;
 ll dx[4] = {1, -1, 0, 0};
 ll dy[4] = {0, 0, 1, -1};
 char sign[5] = {'R', 'L', 'U', 'D', '-'};
-string mp[MAXN];
-char state[MAXN];
+bool vis[MAXN][MAXN];
+string graph[MAXN];
+map<char, ll> signToIndex;
+pair<ll, char> transition[MAXN][MAXN];
+// dis, transfer
 
-vector<ll> ans;
+bool isVaild(ll x, ll y){
+  return 0 <= x and x < N and 0 <= y and y < M and !vis[x][y] and graph[x][y] != '#';
+}
 
 vector<ll> bfs(ll x, ll y){
     queue<pll> qu;
     qu.push(mkp(x, y));
+    vis[x][y] = true;
+    transition[x][y] = mkp(0, '-');
     while(qu.size()){
-
+      ll curx = qu.front().F;
+      ll cury = qu.front().S;
+      qu.pop();
+      for(ll i = 0; i < 4; i++){
+        ll nx = curx + dx[i];
+        ll ny = cury + dy[i];
+        if(isVaild(nx, ny)){
+          vis[nx][ny] = true;
+          transition[nx][ny] = mkp(transition[curx][cury].F + 1, sign[i]);
+        }
+      }
     }
 }
 
 void solve(){
-    cin >> N >> M;
-    for(ll i = 1; i <= N; i++){
-        string tmp;
-        cin >> tmp;
-        mp[i] = '-' + tmp;
+  ll Mx, My, Sx, Sy;
+  for(ll i = 0; i < 4; i++){
+    signToIndex[sign[i]] = i;
+  }
+  cin >> N >> M;
+  for(ll i = 0; i < N; i++){
+    cin >> graph[i];
+  }
+  for(ll i = 0; i < N; i++){
+    for(ll j = 0; j < M; j++){
+      if(graph[i][j] == 'M'){
+        Mx = i;
+        My = j;
+      }
+      else if(graph[i][j] == 'A'){
+        Sx = i;
+        Sy = j;
+      }
     }
-    for(ll i = 1; i <= N; i++)
-        cout << mp[i] << "\n";
-
-    for(ll i = 1; i <= M; i++){
-        bfs(0, i);
+  }
+  bfs(Mx, My);
+  ll minDis = INF;
+  for(ll i = 0; i < N; i++){
+    for(ll j = 0; j < M; j++){
+      if(graph[i][j] == 'M'){
+        Mx = i;
+        My = j;
+      }
     }
-    cout << "NO\n";
+  }
 }
  
 signed main() {
