@@ -1,9 +1,9 @@
-// a[0, j] = P, a[0, i] = P with i < j 
-// infer a[i+1, j] = 0 
-// every op under mod N
+// refer to: https://www.nirlep.dev/adventures/cses/sorting-and-searching/josephus-problem-2
 
 #include <algorithm>
 // #include <bits/stdc++.h>
+// #include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
 #include <deque>
 #include <cmath>
 #include <iostream>
@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 using namespace std;
+using namespace __gnu_pbds;
 #define ll long long
 #define fastio ios::sync_with_stdio(false), cin.tie(0);
 #define pll pair<ll, ll>
@@ -34,27 +35,33 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll N;
+template <typename T> using indexed_set =  tree<T,\
+            null_type, less<T>, rb_tree_tag,\
+            tree_order_statistics_node_update>;
+          
+ll N, K;
+
 
 void solve(){
-    cin >> N;
-    queue<ll> qu;
-    for(ll i = 1; i <= N; i++){
-        qu.push(i);
+    int N, K;
+    cin >> N >> K;
+
+    indexed_set<int> survivals;
+    for (int i = 1; i <= N; i++) survivals.insert(i);
+
+    int index = K + 1;
+    while (survivals.size() > 1) {
+        index %= survivals.size();
+        if (index == 0) index = survivals.size();
+
+        auto it = survivals.find_by_order(index - 1);
+        cout << *it << " ";
+        survivals.erase(it);
+
+        index += K;
     }
-    int flag = 0;
-    while(qu.size() > 1){
-        ll now = qu.front();
-        qu.pop();
-        if(flag){
-            cout << now << " ";
-        }
-        else{
-            qu.push(now);
-        }
-        flag ^= 1;
-    }
-    cout << qu.front() << "\n";
+
+    cout << *survivals.begin() << endl;
 }
  
 signed main() {
