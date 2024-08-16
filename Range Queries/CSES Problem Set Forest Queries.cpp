@@ -14,44 +14,31 @@ const ll INF = 1e18;
 const ll MAXN = 1e3 + 5;
 const double eps = 1e-9;
  
-ll bit[MAXN * MAXN], N, Q;
+ll pre[MAXN][MAXN], N, Q;
 string s[MAXN];
-
-void upd(ll k, ll u){
-    for(ll i = k; i <= N; i += lowbit(i)){
-        bit[i] += u;
-    }
-}
- 
-ll qry(ll k){
-    ll res = 0;
-    for(ll i = k; i > 0; i -= lowbit(i)){
-        res += bit[i];
-    }
-    return res;
-}
  
 void solve(){
     cin >> N >> Q;
-    map<pll, ll> mp;
-    ll count = 1;
-    rep(i, N){
+    for(ll i = 1; i <= N; i++){
         cin >> s[i];
-        rep(j, N){
-            mp[mkp(i, j)] = count;
-            if(s[i][j-1] == '*'){
-                upd(count, 1);
-            }
-            count++;
+        s[i] = " " + s[i];
+    }
+    // cout << "\n\n\n";
+    for(ll i = 1; i <= N; i++){
+        for(ll j = 1; j <= N; j++){
+            pre[i][j] = (pre[i - 1][j] + pre[i][j - 1] - pre[i - 1][j - 1]) + (s[i][j] == '*' ? 1 : 0);
+            // cout << pre[i][j] << " ";
         }
+        // cout << "\n";
     }
     while(Q--){
         ll x1, x2, y1, y2;
         cin >> x1 >> y1 >> x2 >> y2;
-        ll ans = qry(mp[mkp(x2, y2)]) - qry(mp[mkp(x1, y2)]) - qry(mp[mkp(x2, y1)]);
-        if(mp.find(mkp(x1-1, y2-1)) != mp.end()){
-            ans -= qry(mp[mkp(x1-1, y2-1)]);
-        }
+        ll ans = pre[x2][y2] - pre[x1 - 1][y2] - pre[x2][y1 - 1] + pre[x1 - 1][y1 - 1];
+        // cout << "1 : " << pre[x2][y2] << "\n";
+        // cout << "2: " << pre[x1 - 1][y2] << "\n";
+        // cout << "3: " << pre[x2][y1 - 1] << "\n";
+        // cout << "4: " << pre[x1 - 1][y1 - 1] << "\n";
         cout << ans << "\n";
     }
 }

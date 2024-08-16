@@ -28,63 +28,54 @@ const ll MAXN = 2e5 + 5;
 const ll INF = 1e18;
 const ll MOD = 1e9 + 7;
  
-ll a[MAXN], N, pre[MAXN];
+ll N;
  
 vector<ll> vec[2];
 vector<vector<ll> > I(6, vector<ll>(6, 0));
  
 vector<vector<ll> > mat(vector<vector<ll> > &x, vector<vector<ll> > &y) {
   vector<vector<ll> > ret(6, vector<ll>(6, 0));
-  rep(i, 6) {
-    rep(j, 6) {
-      rep(k, 6) { ret[i][j] = (ret[i][j] + x[i][k] * y[k][j]) % MOD; }
+  for (ll i = 0; i < 6; i++) {
+    for (ll j = 0; j < 6; j++) {
+      for (ll k = 0; k < 6; k++) { 
+        ret[i][j] = (ret[i][j] + x[i][k] * y[k][j]) % MOD; 
+      }
     }
   }
   return ret;
 }
  
 vector<vector<ll> > mpow(vector<vector<ll> > x, ll y) {
-  if (y == 0) {
-    return I;
-  }
-  if (y == 1) {
-    return x;
-  }
+  if (y == 0) return I;
+  else if (y == 1) return x;
   vector<vector<ll> > ret(6, vector<ll>(6, 0));
   vector<vector<ll> > tmp = mpow(x, y / 2);
   ret = mat(tmp, tmp);
-  if (y % 2 == 1)
-    ret = mat(ret, x);
+  if (y % 2 == 1) ret = mat(ret, x);
   return ret;
 }
 void solve() {
   cin >> N;
-  if(N == 1){
-    cout << 1 << "\n";
-    return;
-  }
   vector<vector<ll> > m(6, vector<ll>(6, 0));
-  for(ll i = 0; i < 6; i++) m[0][i] = 1;
-  for(ll i = 0; i < 5; i++) m[i+1][i] = 1;
+  m[1][0] = m[2][1] = m[3][2] = m[4][3] = m[5][4] = 1;
   for(ll i = 0; i < 6; i++){
-    for(ll j = 0; j < 6; j++){
-      cout << m[i][j] << " ";
-    }
-    cout << "\n";
+    m[0][i] = 1;
   }
-  vector<vector<ll> > ans = mpow(m, N);
-  ll dp[6][6];
-  for(ll i = 0; i < 6; i++) dp[1][i] = 1;
-  for(ll i = 0; i < 6; i++){
-
-  }
-  // cout << ans[5][4] % MOD << '\n';
+  // for(ll i = 0; i < 6; i++){
+  //   for(ll j = 0; j < 6; j++){
+  //     cout << m[i][j] << " ";
+  //   }
+  //   cout << "\n";
+  // }
+  vector<vector<ll> > ans = mpow(m, N + 6); // +6: initial state need
+  // cout << "\n";
   // for(ll i = 0; i < 6; i++){
   //   for(ll j = 0; j < 6; j++){
   //     cout << ans[i][j] << " ";
   //   }
   //   cout << "\n";
   // }
+  cout << ans[5][5] << "\n";
 }
  
 signed main() {
