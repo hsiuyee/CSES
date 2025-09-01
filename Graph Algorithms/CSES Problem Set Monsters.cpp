@@ -1,15 +1,13 @@
-#include <algorithm>
 // #include <bits/stdc++.h>
-#include <deque>
-#include <cmath>
-#include <iostream>
+#include <algorithm>
 #include <queue>
-#include <stdio.h>
-#include <set>
-#include <map>
-#include <tuple>
 #include <vector>
-#include <string>
+#include <set>
+#include <iostream>
+#include <map>
+#include <cmath>
+#include <iomanip>
+#include <tuple>
 using namespace std;
 #define ll long long
 #define fastio ios::sync_with_stdio(false), cin.tie(0);
@@ -22,86 +20,118 @@ using namespace std;
 #define mkp make_pair
 #define sz(a) (ll) a.size()
 #define all(x) x.begin(), x.end()
-#define rep(i, n) for (ll i = 0; i < n; i++)
-#define lowbit(x) x &(-x)
- 
+#define rep(i, n) for (ll i = 1; i <= n; i++)
+#define lowbit(x) x&(-x)
+
 const ll MAXN = 1e3 + 5;
-// const ll MAXM = 1e2 + 5;
 const ll INF = 1e18;
-const ll MOD = 1e9 + 7;
- 
-ll N, M;
+const ll MOD = 998244353;
+
+ll N, M, dis[MAXN][MAXN];
 ll dx[4] = {1, -1, 0, 0};
 ll dy[4] = {0, 0, 1, -1};
-char sign[5] = {'R', 'L', 'U', 'D', '-'};
-bool vis[MAXN][MAXN];
-string graph[MAXN];
-map<char, ll> signToIndex;
-pair<ll, char> transition[MAXN][MAXN];
-// dis, transfer
+char c[4] = {'D', 'U', 'R', 'L'};
+pll start, from[MAXN][MAXN];;
+queue<pll> qu;
+vector<char> ans;
+bool bfs_start = false, possible = false;
 
-bool isVaild(ll x, ll y){
-  return 0 <= x and x < N and 0 <= y and y < M and !vis[x][y] and graph[x][y] != '#';
+pll operator+(const pll& a, const pll& b) {
+  return pll(a.first + b.first, a.second + b.second);
 }
 
-vector<ll> bfs(ll x, ll y){
-    queue<pll> qu;
-    qu.push(mkp(x, y));
-    vis[x][y] = true;
-    transition[x][y] = mkp(0, '-');
-    while(qu.size()){
-      ll curx = qu.front().F;
-      ll cury = qu.front().S;
-      qu.pop();
-      for(ll i = 0; i < 4; i++){
-        ll nx = curx + dx[i];
-        ll ny = cury + dy[i];
-        if(isVaild(nx, ny)){
-          vis[nx][ny] = true;
-          transition[nx][ny] = mkp(transition[curx][cury].F + 1, sign[i]);
-        }
-      }
-    }
-}
-
-void solve(){
-  ll Mx, My, Sx, Sy;
-  for(ll i = 0; i < 4; i++){
-    signToIndex[sign[i]] = i;
+void check(pll now, pll nxt) {
+  ll distance = dis[now.F][now.S];
+  if (distance + 1 < dis[nxt.F][nxt.S]) {
+    dis[nxt.F][nxt.S] = distance + 1;
+    qu.push(nxt);
+    from[nxt.F][nxt.S] = now;
   }
+}
+
+void retrace(pll now) {
+  pll pre = from[now.F][now.S];
+  if (pre == pll(0, 0)) return;
+  for (ll i = 0; i < 4; i++) {
+    if (pre + pll(dx[i], dy[i]) == now) {
+      ans.push_back(c[i]);
+      break;
+    }
+  }
+  retrace(pre);
+}
+
+void bfs() {
+  while (qu.size()) {
+    pll now = qu.front(), nxt;
+    qu.pop();
+    for (ll i = 0; i < 4; i++) {
+      nxt = now + pll(dx[i], dy[i]);
+      check(now, nxt);
+    }
+    if (bfs_start and (now.F == 1 or now.S == 1 or now.F == N or now.S == M)) {
+      cout << "YES\n";
+      cout << dis[now.F][now.S] << "\n";
+      possible = true;
+      retrace(now);
+      return;
+    }
+  }
+}
+
+void solve() {
   cin >> N >> M;
-  for(ll i = 0; i < N; i++){
-    cin >> graph[i];
-  }
-  for(ll i = 0; i < N; i++){
-    for(ll j = 0; j < M; j++){
-      if(graph[i][j] == 'M'){
-        Mx = i;
-        My = j;
+  string s;
+  for (ll i = 1; i <= N; i++) {
+    cin >> s;
+    s = ' ' + s;
+    for (ll j = 1; j <= M; j++) {
+      dis[i][j] = INF;
+      if (s[j] == '#') dis[i][j] = 0;
+      else if (s[j] == 'M') {
+        qu.push(pll(i, j));
+        dis[i][j] = 0;
       }
-      else if(graph[i][j] == 'A'){
-        Sx = i;
-        Sy = j;
-      }
-    }
-  }
-  bfs(Mx, My);
-  ll minDis = INF;
-  for(ll i = 0; i < N; i++){
-    for(ll j = 0; j < M; j++){
-      if(graph[i][j] == 'M'){
-        Mx = i;
-        My = j;
+      else if (s[j] == 'A') {
+        start.F = i;
+        start.S = j;
       }
     }
   }
+  bfs();
+  bfs_start = true;
+  from[start.F][start.S] = pll(0, 0);
+  dis[start.F][start.S] = 0;
+  qu.push(start);
+  bfs();
+  if (possible) {
+    reverse(all(ans));
+    for (auto it : ans) cout << it;
+    cout << "\n";
+  }
+  else cout << "NO\n";
 }
- 
+
 signed main() {
   fastio ll T = 1;
-//   cin >> T;
+  // cin >> T;
   for (ll i = 1; i <= T; i++) {
     solve();
   }
   return 0;
 }
+
+/*
+Input:
+5 8
+########
+#M..A..#
+#.#.M#.#
+#M#..#..
+#.######
+
+Output:
+YES
+5
+RRDDR
+*/
