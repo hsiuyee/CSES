@@ -3,146 +3,145 @@
 #include <vector>
 #include <set>
 #include <iostream>
+#include <map>
+#include <cmath>
+#include <iomanip>
+#include <tuple>
+#include <cstdlib>
+#include <ctime>
+#include <random>
+#include <chrono>
+#include <numeric>
+#include <climits>
+#include <unordered_map>
+#include <cstring>
 using namespace std;
- 
-#define int long long
-#define fastio ios::sync_with_stdio(false), cin.tie(0);
+#define ll long long
 #define pll pair<ll, ll>
-#define pdd pair<double, double>
-#define F first
-#define S second
+mt19937_64 mt(chrono::steady_clock::now().time_since_epoch().count());
+
+const ll INF = 1e18;
+const ll MOD1 = 1e9+7;
+const ll MOD2 = 998244353;
+
+ll fpow(ll a, ll b, ll m)
+{
+    if(!b) return 1;
+    ll tmp = 1;
+    for(ll cur = a; b; b >>= 1, cur = cur * cur % m) if(b & 1) tmp = tmp * cur % m;
+    return tmp;
+}
+ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
+
+#define fastio ios::sync_with_stdio(false), cin.tie(0);
 #define pb push_back
 #define ppb pop_back
 #define mkp make_pair
 #define sz(a) (int) a.size()
 #define all(x) x.begin(), x.end()
-#define rep(i, n) for (int i = 1; i <= n; i++)
-#define lowbit(x) x &(-x)
- 
-const int MAXN = 800 + 10;
-const int MAXF = 5e18;
-// const ll MOD = 1e9 + 7;
-int graph[MAXN][MAXN];
+#define rep(i, a, b) for (ll i = (a); i <= (b); ++i)
+#define per(i, a, b) for (ll i = (a); i >= (b); --i)
+#define lowbit(x) x&(-x)
+#define vi vector<int>
+
+const ll MAXN = 5e5 + 5;
+ll N, M;
+vector<vector<ll> > ans;
 
 struct Dinic {
-  struct edge {
-    int to, cap, flow, rev;
-  };
-  // static constexpr int MAXN = 1050, MAXF = 1e9;
-  vector<edge> v[MAXN];
-  int top[MAXN], deep[MAXN], side[MAXN], s, t;
-  void make_edge(int s, int t, int cap) {
-    edge e;
-    e.to = t;
-    e.cap = cap;
-    e.flow =  0;
-    e.rev = (int)v[t].size();
-    v[s].emplace_back(e);
-    e.to = s;
-    e.cap = 0;
-    e.flow = 0;
-    e.rev = (int)v[s].size() - 1;
-    v[t].push_back(e);
-  }
-  inline int dfs(int a, int flow) {
-    if (a == t || !flow) return flow;
-    for (int &i = top[a]; i < v[a].size(); i++) {
-      edge &e = v[a][i];
-      if (deep[a] + 1 == deep[e.to] && e.cap - e.flow) {
-        int x = dfs(e.to, min(e.cap - e.flow, flow));
-        if (x) {
-          e.flow += x, v[e.to][e.rev].flow -= x;
-          return x;
-        }
+	struct Edge {
+		int to, rev;
+		ll c, oc;
+		ll flow() { return max(oc - c, 0LL); } // if you need flows
+	};
+	vi lvl, ptr, q;
+	vector<vector<Edge>> adj;
+	Dinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}
+	void addEdge(int a, int b, ll c, ll rcap = 0) {
+		adj[a].push_back({b, sz(adj[b]), c, c});
+		adj[b].push_back({a, sz(adj[a]) - 1, rcap, rcap});
+	}
+	ll dfs(int v, int t, ll f) {
+		if (v == t || !f) return f;
+		for (int& i = ptr[v]; i < sz(adj[v]); i++) {
+			Edge& e = adj[v][i];
+			if (lvl[e.to] == lvl[v] + 1)
+				if (ll p = dfs(e.to, t, min(f, e.c))) {
+					e.c -= p, adj[e.to][e.rev].c += p;
+					return p;
+				}
+		}
+		return 0;
+	}
+	ll calc(int s, int t) {
+		ll flow = 0; q[0] = s;
+		rep(L,0,31) do { // 'int L=30' maybe faster for random data
+		// rep(L,0,30) do { // 'int L=30' maybe faster for random data
+			lvl = ptr = vi(sz(q));
+			int qi = 0, qe = lvl[s] = 1;
+			while (qi < qe && !lvl[t]) {
+				int v = q[qi++];
+				for (Edge e : adj[v])
+					if (!lvl[e.to] && e.c >> (30 - L))
+						q[qe++] = e.to, lvl[e.to] = lvl[v] + 1;
+			}
+			while (ll p = dfs(s, t, LLONG_MAX)) flow += p;
+		} while (lvl[t]);
+		return flow;
+	}
+	bool leftOfMinCut(int a) { return lvl[a] != 0; }
+	void dfs1(ll now, vector<ll> vec) {
+    if (now == N) {
+      ans.push_back(vec);
+      return;
+    }
+    for (auto &e : adj[now]) {
+      if (e.flow() > 0 and e.oc > 0) {
+        e.c += 1;
+        adj[e.to][e.rev].c -= 1;
+        vec.push_back(e.to);
+        dfs1(e.to, vec);
+        vec.pop_back();
+        return;
       }
     }
-    deep[a] = -1;
-    return 0;
-  }
-  inline bool bfs() {
-    queue<int> q;
-    fill_n(deep, MAXN, 0);
-    q.push(s), deep[s] = 1;
-    int tmp;
-    while (!q.empty()) {
-      tmp = q.front(), q.pop();
-      for (edge e : v[tmp])
-        if (!deep[e.to] && e.cap != e.flow)
-          deep[e.to] = deep[tmp] + 1, q.push(e.to);
-    }
-    return deep[t];
-  }
-  int max_flow(int _s, int _t) {
-    s = _s, t = _t;
-    int flow = 0, tflow;
-    while (bfs()) {
-      fill_n(top, MAXN, 0);
-      while ((tflow = dfs(s, MAXF))) flow += tflow;
-    }
-    return flow;
-  }
-  void reset() {
-    fill_n(side, MAXN, 0);
-    for (auto &i : v) i.clear();
   }
 };
 
-void solve(){
-    int N, M, sum = 0, d;
-    int s = 0, t = 2 * N * M + 1;
-    Dinic dinic;
-    cin >> N >> M >> d;
-    N++,M++;
-    rep(i, N - 1){
-        string s;
-        cin >> s;
-        rep(j, M - 1){
-            graph[i][j] = s[j] - '0';
-            dinic.make_edge(i * (N + M) + j, i * N + j + N * M, graph[i][j]);
-        }
-    }
-    char lizard;
-    rep(i, N - 1){
-        string str;
-        cin >> str;
-        rep(j, M - 1){
-            lizard = str[j];
-            if(lizard == 'L'){
-                dinic.make_edge(s, i * N + j, 1);
-            }
-        }
-    }
-    rep(i, N - 1){
-        rep(j, M - 1){
-            rep(p, N - 1){
-                rep(q, M - 1){
-                    if(abs(p - i) + abs(q - j) <= d){
-                        dinic.make_edge(p * N + q + N * M, i * N + j + N * M, MAXF);
-                    }
-                }
-            }
-        }
-    }
-    rep(i, N){ 
-        int j = 0; // ----- col 0
-        dinic.make_edge(i * N + j + N * M, t, MAXF);
-        j = M; // ----- col M
-        dinic.make_edge(i * N + j + N * M, t, MAXF);
-    }
-    rep(j, M){ 
-        int i = 0; // ----- row 0
-        dinic.make_edge(i * N + j + N * M, t, MAXF);
-        i = N; // ----- row N
-        dinic.make_edge(i * N + j + N * M, t, MAXF);
-    }
-    cout << sum - dinic.max_flow(s, t);
+
+
+
+void solve() {
+	cin >> N >> M;
+	ll s = 1, t = N;
+	Dinic dinic(t + 1);
+	ll a, b;
+	for (ll i = 1; i <= M; i++) {
+		cin >> a >> b;
+		dinic.addEdge(a, b, 1);
+	}
+	ll max_flow = dinic.calc(s, t);
+	cout << max_flow << "\n";
+	for (ll i = 0; i < max_flow; i++) {
+		dinic.dfs1(1, {1});
+	}
+	for (auto v : ans) {
+		cout << sz(v) << "\n";
+		for (auto it : v) cout << it << " ";
+		cout << "\n";
+	}
 }
- 
+
 signed main() {
-  fastio int T = 1;
-//   cin >> T;
-  for (int i = 1; i <= T; i++) {
-    solve();
-  }
-  return 0;
+	fastio ll T = 1;
+	// cin >> T;
+	for (ll i = 1; i <= T; i++) {
+		solve();
+	}
+	return 0;
 }
+
+/*
+0. WA1 -> multiple input
+1. WA7 -> specify mod, and use mod or not
+*/
