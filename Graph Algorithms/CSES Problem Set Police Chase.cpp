@@ -34,8 +34,6 @@ ll fpow(ll a, ll b, ll m)
 ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 
 #define fastio ios::sync_with_stdio(false), cin.tie(0);
-#define F first
-#define S second
 #define pb push_back
 #define ppb pop_back
 #define mkp make_pair
@@ -46,9 +44,8 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 #define lowbit(x) x&(-x)
 #define vi vector<int>
 
-const ll MAXN = 5e5 + 5;
+const ll MAXN = 5e2 + 5;
 ll N, M;
-vector<vector<ll> > ans;
 
 struct Dinic {
 	struct Edge {
@@ -92,26 +89,34 @@ struct Dinic {
 		return flow;
 	}
 	bool leftOfMinCut(int a) { return lvl[a] != 0; }
-	void dfs1(ll now, vector<ll> vec) {
-    if (now == N) {
-      ans.push_back(vec);
-      return;
+    void findMinCutEdges(ll s) {
+        vector<bool> vis(adj.size(), false);
+        queue<ll> qu;
+        qu.push(s);
+        vis[s] = true;
+        while(qu.size()) {
+            ll t = qu.front();
+            qu.pop();
+            for (auto &e : adj[t]) {
+                if (!vis[e.to] and e.c > 0) {
+                    vis[e.to] = true;
+                    qu.push(e.to);
+                }
+            }
+        }
+        vector<pll> cutEdges;
+        for (ll u = 0; u < sz(adj); u++) {
+            if (vis[u]) {
+                for (auto e : adj[u]) {
+                    if (!vis[e.to] and e.oc > 0) {
+                        cutEdges.push_back(mkp(u, e.to));
+                    }
+                }
+            }
+        }
+        for (auto it : cutEdges) cout << it.first << " " << it.second << "\n";
     }
-    for (auto &e : adj[now]) {
-      if (e.flow() > 0 and e.oc > 0) {
-        e.c += 1;
-        adj[e.to][e.rev].c -= 1;
-        vec.push_back(e.to);
-        dfs1(e.to, vec);
-        vec.pop_back();
-        return;
-      }
-    }
-  }
 };
-
-
-
 
 void solve() {
 	cin >> N >> M;
@@ -121,17 +126,11 @@ void solve() {
 	for (ll i = 1; i <= M; i++) {
 		cin >> a >> b;
 		dinic.addEdge(a, b, 1);
+        dinic.addEdge(b, a, 1);
 	}
 	ll max_flow = dinic.calc(s, t);
 	cout << max_flow << "\n";
-	for (ll i = 0; i < max_flow; i++) {
-		dinic.dfs1(1, {1});
-	}
-	for (auto v : ans) {
-		cout << sz(v) << "\n";
-		for (auto it : v) cout << it << " ";
-		cout << "\n";
-	}
+    dinic.findMinCutEdges(s);
 }
 
 signed main() {

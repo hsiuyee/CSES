@@ -46,12 +46,12 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 #define lowbit(x) x&(-x)
 #define vi vector<int>
 
-const ll MAXN = 1e5 + 5;
+const ll MAXN = 2e5 + 5;
 vector<ll> G[MAXN];
 vector<ll> GT[MAXN];
 ll N, M, vis[MAXN], color[MAXN], indeg[MAXN];
 vector<ll> v; // build order
-ll scc, coin[MAXN], newcoin[MAXN], dp[MAXN];
+ll scc, sz[MAXN], dp[MAXN];
 
 void dfs(ll a) {
     vis[a] = 1;
@@ -78,53 +78,61 @@ vector<ll> Gnew[MAXN];
 map<pll, bool> mp;
 
 ll ans() {
-    ll rev = 0;
+    vector<ll> toposort;
     queue<ll> qu;
     for (ll i = 1; i < scc; i++) {
         if (indeg[i] == 0) {
             qu.push(i);
-            dp[i] = newcoin[i];
         }
+        dp[i] = sz[i];
     }
-    while (qu.size()) {
-        ll t = qu.front();
-        rev = max(rev, dp[t]); // one-point edge case
+    
+    while (sz(qu)) {
+        ll u = qu.front();
         qu.pop();
-        for (auto it : Gnew[t]) {
-            dp[it] = max(dp[it], dp[t] + newcoin[it]);
-            indeg[it]--;
-            if (indeg[it] == 0) {
-                qu.push(it);
+        toposort.push_back(u);
+        for (auto v : Gnew[u]) {
+            indeg[v]--;
+            if (indeg[v] == 0) {
+                qu.push(v);
             }
         }
     }
-    return rev;
+    for (auto u : toposort) {
+        for (auto v : Gnew[u]) {
+            dp[v] += dp[v];
+        }
+    }
+    for (ll i = 1; i <= N; i++) {
+        cout << dp[color[i]] << " ";
+    }
 }
 
 void build_new_graph() {
     for (ll i = 1; i <= N; i++) {
-        newcoin[color[i]] += coin[i];
+        sz[color[i]]++;
+        // cout << i << " color " << color[i] << "\n";
     }
+    // for (ll i = 1; i < scc; i++) cout << "scc: " << i << " " << sz[i] << "\n";
     for (ll i = 1; i <= N; i++) {
         for (auto it : G[i]) {
             pll p = mkp(color[i], color[it]);
             if (p.F == p.S || mp[p]) continue;
             mp[p] = true;
-            Gnew[p.F].push_back(p.S);
-            indeg[p.S]++;
+            Gnew[p.S].push_back(p.F);
+            indeg[p.F]++;
         }
     }
 }
 
 void solve() {
-	cin >> N >> M;
-    ll a, b;
+	cin >> N;
+    ll a;
     scc = 1;
-    for (ll i = 1; i <= N; i++) cin >> coin[i];
-    for (ll i = 1; i <= M; i++) {
-        cin >> a >> b;
-        G[a].push_back(b);
-        GT[b].push_back(a);
+    for (ll i = 1; i <= N; i++) {
+        cin >> a;
+        G[i].push_back(a);
+        GT[a].push_back(i);
     }
     for (ll i = 1; i <= N; i++) {
         if(!vis[i]) dfs(i);
@@ -136,7 +144,7 @@ void solve() {
         }
     }
     build_new_graph();
-    cout << ans() << "\n";
+    ans();
 }
 
 signed main() {
