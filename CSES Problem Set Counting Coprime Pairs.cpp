@@ -1,3 +1,4 @@
+// refer: Erdos-Szekeres Theorem
 #include <algorithm>
 #include <queue>
 #include <vector>
@@ -19,11 +20,11 @@ using namespace std;
 #define ll long long
 #define pll pair<ll, ll>
 mt19937_64 mt(chrono::steady_clock::now().time_since_epoch().count());
-
+ 
 const ll INF = 1e18;
 const ll MOD1 = 1e9+7;
 const ll MOD2 = 998244353;
-
+ 
 ll fpow(ll a, ll b, ll m)
 {
     if(!b) return 1;
@@ -32,7 +33,7 @@ ll fpow(ll a, ll b, ll m)
     return tmp;
 }
 ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
-
+ 
 #define fastio ios::sync_with_stdio(false), cin.tie(0);
 #define pb push_back
 #define ppb pop_back
@@ -45,52 +46,56 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 #define vi vector<int>
 
 const ll MAXN = 1e6 + 5;
-
-int N;
-string s;
+ 
+int N, a[MAXN];
+ll cnt[MAXN], multiple_cnt[MAXN];
 
 // ll ask(int a,int b,int c){
   
 // }
-
+ 
 // void ans(ll x, ll y, ll z) {
   
 // }
 
-vi Z(const string& S) {
-	vi z(sz(S));
-	int l = -1, r = -1;
-	for (int i = 1; i < sz(S); i++) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
-	}
-	return z;
+int mu(int n) {
+  int res = 1;
+  for (int i = 2; i * i <= n; ++i) {
+    if (n % i == 0) {
+      n /= i;
+      if (n % i == 0) return 0;
+      res = -res;
+    }
+  }
+  if (n > 1) res = -res;
+  return res;
 }
 
 void solve() {
-    string s;
-    cin >> s;
-    N = sz(s);
-    vi v = Z(s);
-    for (ll i = 1; i < N; i++) {
-        if (v[i] + i == N) cout << i << " ";
-        // cout << "i: " << i << " v[i]: " << v[i] << "\n";
+	cin >> N;
+    for (int i = 0; i < N; i++) cin >> a[i];
+    for (int i = 0; i < N; i++) cnt[a[i]]++;
+    for (int i = 1; i <= 1000000; i++) {
+        for (ll j = i; j <= 1000000; j += i) {
+            multiple_cnt[i] += cnt[j];
+        }
     }
-    cout << N << "\n";
+    ll ans = 0;
+    for (int i = 1; i <= 1000000; i++) {
+        ans += mu(i) * (multiple_cnt[i]) * (multiple_cnt[i] - 1) / 2;
+    }
+    cout << ans << "\n";
 }
-
+ 
 signed main() {
-	fastio ll T = 1;
+	fastio int T = 1;
 	// cin >> T;
-	for (ll i = 1; i <= T; i++) {
+	for (int i = 1; i <= T; i++) {
 		solve();
 	}
 	return 0;
 }
-
+ 
 /*
 0. WA1 -> multiple input
 1. WA7 -> specify mod, and use mod or not

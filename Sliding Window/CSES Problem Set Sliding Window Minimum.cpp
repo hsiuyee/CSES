@@ -44,10 +44,9 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 #define lowbit(x) x&(-x)
 #define vi vector<int>
 
-const ll MAXN = 1e6 + 5;
+const ll MAXN = 1e7 + 5;
 
-int N;
-string s;
+ll N, K, x[MAXN];
 
 // ll ask(int a,int b,int c){
   
@@ -57,29 +56,24 @@ string s;
   
 // }
 
-vi Z(const string& S) {
-	vi z(sz(S));
-	int l = -1, r = -1;
-	for (int i = 1; i < sz(S); i++) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
-	}
-	return z;
-}
-
 void solve() {
-    string s;
-    cin >> s;
-    N = sz(s);
-    vi v = Z(s);
-    for (ll i = 1; i < N; i++) {
-        if (v[i] + i == N) cout << i << " ";
-        // cout << "i: " << i << " v[i]: " << v[i] << "\n";
+	cin >> N >> K;
+    ll a, b, c;
+    cin >> x[1] >> a >> b >> c;
+    for (ll i = 2; i <= N; i++) {
+        x[i] = x[i-1] * a + b;
+        x[i] %= c;
+        // cout << "x[i]: " << x[i] << "\n";
     }
-    cout << N << "\n";
+    deque<ll> dq;
+    ll ans_xor = 0;
+    for (ll i = 1; i <= N; i++) {
+        while (dq.size() and dq.front() <= i - K) dq.pop_front();
+        while (dq.size() and x[dq.back()] >= x[i]) dq.pop_back();
+        dq.push_back(i);
+        if (i >= K) ans_xor ^= x[dq.front()];
+    }
+    cout << ans_xor << "\n";
 }
 
 signed main() {

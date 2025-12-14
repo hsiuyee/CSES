@@ -19,11 +19,11 @@ using namespace std;
 #define ll long long
 #define pll pair<ll, ll>
 mt19937_64 mt(chrono::steady_clock::now().time_since_epoch().count());
-
+ 
 const ll INF = 1e18;
 const ll MOD1 = 1e9+7;
 const ll MOD2 = 998244353;
-
+ 
 ll fpow(ll a, ll b, ll m)
 {
     if(!b) return 1;
@@ -32,7 +32,7 @@ ll fpow(ll a, ll b, ll m)
     return tmp;
 }
 ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
-
+ 
 #define fastio ios::sync_with_stdio(false), cin.tie(0);
 #define pb push_back
 #define ppb pop_back
@@ -43,54 +43,74 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 #define per(i, a, b) for (ll i = (a); i >= (b); --i)
 #define lowbit(x) x&(-x)
 #define vi vector<int>
-
-const ll MAXN = 1e6 + 5;
-
-int N;
-string s;
-
+ 
+const ll MAXN = 1e7 + 5;
+ 
+int N, K, x[MAXN];
+map<ll, ll> freq;
+map<ll, set<ll> > freq_num;
+ 
 // ll ask(int a,int b,int c){
   
 // }
-
+ 
 // void ans(ll x, ll y, ll z) {
   
 // }
-
-vi Z(const string& S) {
-	vi z(sz(S));
-	int l = -1, r = -1;
-	for (int i = 1; i < sz(S); i++) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
-	}
-	return z;
-}
-
-void solve() {
-    string s;
-    cin >> s;
-    N = sz(s);
-    vi v = Z(s);
-    for (ll i = 1; i < N; i++) {
-        if (v[i] + i == N) cout << i << " ";
-        // cout << "i: " << i << " v[i]: " << v[i] << "\n";
+ 
+void cleanup(int f) {
+    if (freq_num.count(f) && freq_num[f].empty()) {
+        freq_num.erase(f);
     }
-    cout << N << "\n";
 }
-
+ 
+void add(ll val) {
+    ll old_freq = freq[val];
+    ll new_freq = old_freq + 1;
+    freq[val] = new_freq;
+    if (old_freq > 0) {
+        freq_num[old_freq].erase(val);
+        cleanup(old_freq);
+    }
+    freq_num[new_freq].insert(val);
+}
+ 
+void remove(ll val) {
+    ll old_freq = freq[val];
+    ll new_freq = old_freq - 1;
+    freq[val] = new_freq;
+    freq_num[old_freq].erase(val);
+    cleanup(old_freq);
+    freq_num[new_freq].insert(val);
+}
+ 
+ll qry() {
+    return *freq_num.rbegin()->second.begin();
+}
+ 
+void solve() {
+	cin >> N >> K;
+    for (int i = 1; i <= N; i++) cin >> x[i];
+    map<ll, ll> cnt;
+    int sliding_cnt = 0;
+    vector<int> ans;
+    for (int i = 1; i <= N; i++) {
+        add(x[i]);
+        if (i >= K + 1) remove(x[i - K]);
+        if (i >= K) ans.push_back(qry());
+    }
+    for (auto it : ans) cout << it << " ";
+}
+ 
 signed main() {
-	fastio ll T = 1;
+	fastio int T = 1;
 	// cin >> T;
-	for (ll i = 1; i <= T; i++) {
+	for (int i = 1; i <= T; i++) {
 		solve();
 	}
 	return 0;
 }
-
+ 
 /*
 0. WA1 -> multiple input
 1. WA7 -> specify mod, and use mod or not

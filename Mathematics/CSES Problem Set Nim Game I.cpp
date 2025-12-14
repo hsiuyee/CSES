@@ -46,7 +46,7 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 
 const ll MAXN = 1e6 + 5;
 
-int N;
+int N, a[MAXN];
 string s;
 
 // ll ask(int a,int b,int c){
@@ -57,34 +57,18 @@ string s;
   
 // }
 
-vi Z(const string& S) {
-	vi z(sz(S));
-	int l = -1, r = -1;
-	for (int i = 1; i < sz(S); i++) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
-	}
-	return z;
-}
-
 void solve() {
-    string s;
-    cin >> s;
-    N = sz(s);
-    vi v = Z(s);
-    for (ll i = 1; i < N; i++) {
-        if (v[i] + i == N) cout << i << " ";
-        // cout << "i: " << i << " v[i]: " << v[i] << "\n";
-    }
-    cout << N << "\n";
+    cin >> N;
+    for (ll i = 0; i < N; i++) cin >> a[i];
+    ll xor_value = 0;
+    for (ll i = 0; i < N; i++) xor_value ^= a[i];
+    if (xor_value == 0) cout << "second\n";
+    else cout << "first\n";
 }
 
 signed main() {
 	fastio ll T = 1;
-	// cin >> T;
+	cin >> T;
 	for (ll i = 1; i <= T; i++) {
 		solve();
 	}

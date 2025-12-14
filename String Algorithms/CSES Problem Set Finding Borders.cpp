@@ -75,11 +75,9 @@ void solve() {
     cin >> s;
     N = sz(s);
     vi v = Z(s);
-    for (ll i = 1; i < N; i++) {
-        if (v[i] + i == N) cout << i << " ";
-        // cout << "i: " << i << " v[i]: " << v[i] << "\n";
+    for (ll i = N - 1; i >= 1; i--) {
+        if (v[i] == N - i) cout << N - i << " ";
     }
-    cout << N << "\n";
 }
 
 signed main() {

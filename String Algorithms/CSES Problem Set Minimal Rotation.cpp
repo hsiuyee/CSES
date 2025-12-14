@@ -46,7 +46,6 @@ ll inv(ll a, ll m) {return fpow(a, m - 2, m);}
 
 const ll MAXN = 1e6 + 5;
 
-int N;
 string s;
 
 // ll ask(int a,int b,int c){
@@ -57,29 +56,22 @@ string s;
   
 // }
 
-vi Z(const string& S) {
-	vi z(sz(S));
-	int l = -1, r = -1;
-	for (int i = 1; i < sz(S); i++) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
+int minRotation(string s) {
+	int a=0, N=sz(s); s += s;
+	for (int b = 0; b < N; b++) 
+        for (int k = 0; k < N; k++) {
+            if (a+k == b || s[a+k] < s[b+k]) {b += max(0, k-1); break;}
+            if (s[a+k] > s[b+k]) { a = b; break; }
 	}
-	return z;
+	return a;
 }
 
 void solve() {
     string s;
     cin >> s;
-    N = sz(s);
-    vi v = Z(s);
-    for (ll i = 1; i < N; i++) {
-        if (v[i] + i == N) cout << i << " ";
-        // cout << "i: " << i << " v[i]: " << v[i] << "\n";
-    }
-    cout << N << "\n";
+    int n = s.size();
+    s += s;
+    cout << s.substr(minRotation(s), n) << "\n";
 }
 
 signed main() {
